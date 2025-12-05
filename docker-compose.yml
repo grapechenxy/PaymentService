@@ -1,0 +1,67 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.2-management
+    container_name: payment-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+    volumes:
+      - ./ops/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+
+  rabbitmq-seeder:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - rabbitmq
+    entrypoint: ["/bin/sh","-ec"]
+    command:
+      - |
+        sleep 15
+        for payload in /payloads/*.json; do
+          echo "Seeding $$payload"
+          curl -u guest:guest -H 'content-type:application/json' \
+            -X POST http://rabbitmq:15672/api/exchanges/%2F/payments.exchange/publish \
+            -d @$$payload
+        done
+    volumes:
+      - ./ops/rabbitmq/payloads:/payloads:ro
+
+  mongodb:
+    image: mongo:8.2
+    container_name: payment-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./ops/mongodb/init.js:/docker-entrypoint-initdb.d/init.js:ro
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: payment-mongo-express
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    ports:
+      - "8081:8081"
+
+  mock-api:
+    build:
+      context: ./mock-api
+      dockerfile: Dockerfile
+    container_name: payment-mock-api
+    environment:
+      - MOCK_MODE=${MOCK_MODE:-alternate}
+      - MOCK_RANDOM_SUCCESS_PCT=${MOCK_RANDOM_SUCCESS_PCT:-50}
+    ports:
+      - "8090:8090"
+
+volumes:
+  mongo-data:

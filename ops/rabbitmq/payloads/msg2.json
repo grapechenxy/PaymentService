@@ -1,0 +1,6 @@
+{
+  "properties": {},
+  "routing_key": "payments.create",
+  "payload": "{\"id\":\"22222222-2222-4222-8222-222222222222\",\"userId\":\"user-002\",\"paymentId\":\"pay-002\",\"paymentType\":\"bankaccount\",\"paymentInfo\":\"SE3550000000054910000003\",\"amount\":\"1000.00\",\"createdAt\":\"2025-01-10T10:05:00Z\",\"correlationId\":\"corr-002\"}",
+  "payload_encoding": "string"
+}
