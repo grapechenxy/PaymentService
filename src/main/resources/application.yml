@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: paymentservice
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:-mongodb://localhost:27017/paymentservice}
+      database: paymentservice
+
+payments:
+  exchange: payments.exchange
+  queue: payments.queue
+  dlq: payments.dlq
+  routing-key: payments.create
+  dl-routing-key: payments.create.dead
+  retry:
+    interval-days: 1
+    jitter-seconds: 900
+    max-total-attempts: 4 # initial attempt + 3 retries
+    scheduler-cron: "0 */5 * * * *" # every 5 minutes, runs due retries
+  external:
+    base-url: http://localhost:8090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

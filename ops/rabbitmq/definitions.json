@@ -1,0 +1,71 @@
+{
+  "users": [
+    {
+      "name": "guest",
+      "password": "guest",
+      "tags": "administrator"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "vhosts": [
+    { "name": "/" }
+  ],
+  "parameters": [],
+  "policies": [],
+  "queues": [
+    {
+      "name": "payments.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "payments.exchange",
+        "x-dead-letter-routing-key": "payments.create.dead"
+      }
+    },
+    {
+      "name": "payments.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "payments.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "payments.exchange",
+      "vhost": "/",
+      "destination": "payments.queue",
+      "destination_type": "queue",
+      "routing_key": "payments.create",
+      "arguments": {}
+    },
+    {
+      "source": "payments.exchange",
+      "vhost": "/",
+      "destination": "payments.dlq",
+      "destination_type": "queue",
+      "routing_key": "payments.create.dead",
+      "arguments": {}
+    }
+  ]
+}

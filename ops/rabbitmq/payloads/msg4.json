@@ -1,0 +1,6 @@
+{
+  "properties": {},
+  "routing_key": "payments.create",
+  "payload": "{\"id\":\"44444444-4444-4444-8444-444444444444\",\"userId\":\"user-004\",\"paymentId\":\"pay-004\",\"paymentType\":\"bg\",\"paymentInfo\":\"9876-5\",\"amount\":\"5000.00\",\"createdAt\":\"2025-01-10T10:15:00Z\",\"correlationId\":\"corr-004\"}",
+  "payload_encoding": "string"
+}
